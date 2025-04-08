@@ -1,0 +1,252 @@
+---
+title: "Ćwiczenia z analizy danych w R"
+author: "mmcharchuta"
+date: "2025-04-08"
+output:
+  html_document: default
+---
+
+### ĆWICZENIE NR 1: Wczytaj i zbadaj zbiór danych
+
+```{r load_and_explore_data, message=FALSE, warning=FALSE}
+# Load necessary libraries
+library(tidyverse)
+
+# Load the dataset
+url <- "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/tips.csv"
+tips <- read_csv(url)
+
+# Display the structure of the dataset
+str(tips)
+
+# Count unique values in the 'day' column
+unique_days <- n_distinct(tips$day)
+cat("Liczba unikalnych wartości w kolumnie 'day':", unique_days, "\n")
+```
+
+---
+
+### ĆWICZENIE NR 2: Tworzenie prostego wykresu z ggplot2
+
+```{r ggplot2_visualization, message=FALSE, warning=FALSE}
+# Load ggplot2
+library(ggplot2)
+
+# Find the day with the highest average tip
+highest_tips_day <- tips %>%
+  group_by(day) %>%
+  summarise(avg_tip = mean(tip)) %>%
+  arrange(desc(avg_tip)) %>%
+  slice(1)
+
+cat("Dzień tygodnia z najwyższymi napiwkami:", highest_tips_day$day, "\n")
+
+# Create a violin plot for tips by day
+ggplot(tips, aes(x = day, y = tip, fill = day)) +
+  geom_violin() +
+  labs(title = "Rozkład napiwków w zależności od dnia tygodnia",
+       x = "Dzień tygodnia",
+       y = "Napiwek") +
+  theme_minimal()
+```
+
+---
+
+### ĆWICZENIE NR 3: Interaktywny wykres z plotly
+
+```{r plotly_interactive_plot, message=FALSE, warning=FALSE}
+# Load plotly
+library(plotly)
+
+# Modify the 'sex' column to use custom labels
+polish_tips <- tips %>%
+  mutate(sex = recode(sex, "Female" = "Kobieta", "Male" = "Mężczyzna"))
+
+# Calculate the correlation between total_bill and tip for all clients
+correlation <- cor(tips$total_bill, tips$tip, method = "pearson")
+cat("Współczynnik Korelacji Pearsona rachunku do napiwku (dla wszystkich):", correlation, "\n")
+
+# Calculate the correlation for female clients
+correlation_female <- cor(tips$total_bill[tips$sex == "Female"], tips$tip[tips$sex == "Female"], method = "pearson")
+cat("Współczynnik Korelacji Pearsona rachunku do napiwku (dla kobiet):", correlation_female, "\n")
+
+# Calculate the correlation for male clients
+correlation_male <- cor(tips$total_bill[tips$sex == "Male"], tips$tip[tips$sex == "Male"], method = "pearson")
+cat("Współczynnik Korelacji Pearsona rachunku do napiwku (dla mężczyzn):", correlation_male, "\n")
+
+# Calculate the correlation between total_bill and tip for all clients
+correlation <- cor(tips$total_bill, tips$tip, method = "spearman")
+cat("Współczynnik Korelacji Spearmana rachunku do napiwku (dla wszystkich):", correlation, "\n")
+
+# Calculate the correlation for female clients
+correlation_female <- cor(tips$total_bill[tips$sex == "Female"], tips$tip[tips$sex == "Female"], method = "spearman")
+cat("Współczynnik Korelacji Spearmana rachunku do napiwku (dla kobiet):", correlation_female, "\n")
+
+# Calculate the correlation for male clients
+correlation_male <- cor(tips$total_bill[tips$sex == "Male"], tips$tip[tips$sex == "Male"], method = "spearman")
+cat("Współczynnik Korelacji Spearmana rachunku do napiwku (dla mężczyzn):", correlation_male, "\n")
+
+
+# Create the plot with separate trend lines for male and female
+plot <- ggplot(polish_tips, aes(x = total_bill, y = tip, color = sex)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, aes(linetype = sex)) + # Add separate trend lines
+  labs(
+    title = "Zależność między rachunkiem a napiwkiem, a płcią płacącego",
+    x = "Rachunek [$]",
+    y = "Napiwek [$]"
+  ) +
+  scale_color_manual(
+    name = "Płeć", # Custom legend title
+    values = c("Kobieta" = "blue", "Mężczyzna" = "red") # Custom colors
+  ) +
+  scale_linetype_manual(
+    name = "Płeć", # Custom legend title for line types
+    values = c("Kobieta" = "solid", "Mężczyzna" = "solid") # Custom line types
+  ) +
+  theme_minimal()
+
+# Convert ggplot to plotly
+ggplotly(plot)
+
+# Perform a t-test to compare tips given by men and women
+t_test_result <- t.test(tip ~ sex, data = tips, alternative = "greater")
+
+# Display the t-test result
+cat("T-test result:\n")
+print(t_test_result)
+
+```
+
+---
+
+
+### ĆWICZENIE NR 4: Zestaw danych z binarną zmienną zależną i niezależną
+
+```{r binary_data_analysis, message=FALSE, warning=FALSE}
+# Create a binary dataset
+binary_data <- tips %>%
+  mutate(
+    high_tip = ifelse(tip > median(tip), 1, 0), # Binary dependent variable
+    weekend = ifelse(day %in% c("Sat", "Sun"), 1, 0) # Binary independent variable
+  )
+
+# Display the structure of the binary dataset
+str(binary_data)
+
+# Example analysis: Proportion of high tips on weekends vs weekdays
+binary_summary <- binary_data %>%
+  group_by(weekend) %>%
+  summarise(
+    proportion_high_tips = mean(high_tip)
+  )
+
+binary_summary
+```
+
+---
+
+### ĆWICZENIE NR 5: Binary vs. Categorical
+
+```{r binary_vs_categorical, message=FALSE, warning=FALSE}
+# Create a dataset with a binary independent variable and a categorical dependent variable
+binary_categorical_data <- tips %>%
+  mutate(
+    weekend = ifelse(day %in% c("Sat", "Sun"), "Weekend", "Weekday"), # Binary independent variable
+    tip_category = cut(tip, breaks = c(0, 2, 4, Inf), labels = c("Low", "Medium", "High")) # Categorical dependent variable
+  )
+
+# Visualization 1: Bar plot
+ggplot(binary_categorical_data, aes(x = weekend, fill = tip_category)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Tip Categories by Weekend/Weekday", x = "Day Type", y = "Count", fill = "Tip Category") +
+  theme_minimal()
+
+# Visualization 2: Stacked bar plot
+ggplot(binary_categorical_data, aes(x = weekend, fill = tip_category)) +
+  geom_bar(position = "fill") +
+  labs(title = "Proportion of Tip Categories by Weekend/Weekday", x = "Day Type", y = "Proportion", fill = "Tip Category") +
+  theme_minimal()
+```
+
+---
+
+### ĆWICZENIE NR 6: Categorical vs. Binary
+
+```{r categorical_vs_binary, message=FALSE, warning=FALSE}
+# Create a dataset with a categorical independent variable and a binary dependent variable
+categorical_binary_data <- tips %>%
+  mutate(
+    high_tip = ifelse(tip > median(tip), "High Tip", "Low Tip") # Binary dependent variable
+  )
+
+# Visualization 1: Grouped bar plot
+ggplot(categorical_binary_data, aes(x = day, fill = high_tip)) +
+  geom_bar(position = "dodge") +
+  labs(title = "High vs Low Tips by Day", x = "Day", y = "Count", fill = "Tip Level") +
+  theme_minimal()
+
+# Visualization 2: Proportional bar plot
+ggplot(categorical_binary_data, aes(x = day, fill = high_tip)) +
+  geom_bar(position = "fill") +
+  labs(title = "Proportion of High vs Low Tips by Day", x = "Day", y = "Proportion", fill = "Tip Level") +
+  theme_minimal()
+```
+
+---
+
+### ĆWICZENIE NR 7: Categorical vs. Categorical
+
+```{r categorical_vs_categorical, message=FALSE, warning=FALSE}
+# Create a dataset with two categorical variables
+categorical_categorical_data <- tips
+
+# Visualization 1: Mosaic plot
+library(ggmosaic)
+ggplot(data = categorical_categorical_data) +
+  geom_mosaic(aes(weight = tip, x = product(day), fill = sex)) +
+  labs(title = "Mosaic Plot of Day and Sex", x = "Day", y = "Proportion", fill = "Sex") +
+  theme_minimal()
+
+# Visualization 2: Heatmap
+ggplot(categorical_categorical_data, aes(x = day, y = sex, fill = ..count..)) +
+  geom_bin2d() +
+  labs(title = "Heatmap of Day and Sex", x = "Day", y = "Sex", fill = "Count") +
+  theme_minimal()
+```
+
+---
+
+### PROJEKT NA ZAJĘCIA NR 2: Exploratory vs Explanatory
+
+#### **Exploratory Visualization**
+```{r exploratory_visualization, message=FALSE, warning=FALSE}
+# Exploratory visualization: Scatter plot with trend line
+ggplot(tips, aes(x = total_bill, y = tip)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(title = "Exploratory: Relationship Between Total Bill and Tip", x = "Total Bill", y = "Tip") +
+  theme_minimal()
+```
+
+#### **Explanatory Visualization**
+```{r explanatory_visualization, message=FALSE, warning=FALSE}
+# Explanatory visualization: Annotated scatter plot
+ggplot(tips, aes(x = total_bill, y = tip)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  annotate("text", x = 40, y = 8, label = "Higher bills tend to have higher tips", color = "red") +
+  labs(title = "Explanatory: Total Bill vs Tip", x = "Total Bill", y = "Tip") +
+  theme_minimal()
+```
+
+#### **Mixed Visualization**
+```{r mixed_visualization, message=FALSE, warning=FALSE}
+# Mixed visualization: Combining exploratory and explanatory
+ggplot(tips, aes(x = total_bill, y = tip)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  annotate("text", x = 40, y = 8, label = "Higher bills tend to have higher tips", color = "red") +
+  labs(title = "Mixed: Total Bill vs Tip", x = "Total Bill", y = "Tip") +
+  theme_minimal()
+```
