@@ -1,51 +1,24 @@
 ---
-title: "PROJEKT NA ZAJĘCIA NR 3: Prezentacja modułowa"
+title: "PROJEKT NA ZAJĘCIA NR 4: Narracja"
 author: "mmcharchuta"
-date: "2025-04-15"
+date: "2025-04-29"
 output:
   pdf_document: default
   html_document: default
 always_allow_html: true
 ---
-### PROJEKT NA ZAJĘCIA NR 3: Prezentacja modułowa
+### PROJEKT NA ZAJĘCIA NR 4: Narracja
+Przygotuj narrację prezentującą dowolne dane
+
+WYMOGI:
+- Prezentację narracji można przygotować ja w MS Wordzie lub innym programie, o ile zawiera wszystkie wymagane elementy.
+- Narracja ma zaczynać się od tytułu i być podzielona na trzy części, każda wykorzystująca inny wzorzec prezentacji danych.
+- Każda część musi składać się z 1 lub kilku paneli prezentujących dane wizualnie wraz z opisem słownym wymaganym do zrozumienia narracji.
+- Dodatkowo każda część ma zawierać krótki opis odpowiadający na pytanie 'Co ma zrozumieć widz (ew. Na co ma zwrócić uwagę)?' 
+  - Odpowiedź na to pytanie ma wykazać jak narracja ma być przekazana widzowi, np.: 'widz ma zapamiętać, że różnica pomiędzy X a Y jest większa niż gdziekolwiek indziej, co jest konieczne do zrozumienia aspektu Z narracji'.
+- Do prezentacji musi być dostarczony kod w programie R umożliwiający generowanie tej prezentacji (wraz z importem wszystkich wymaganych bibliotek).
 
 
 ```{r project_Prezentacja_modułowa, message=FALSE, warning=FALSE}
-# Load necessary libraries
-library(tidyverse)
-library(ggplot2)
-library(plotly)
-library(gapminder)
-# Load dataset
-data("gapminder", package = "gapminder")
 
-# Filter data for the narrative: "Wzrost długości życia"
-life_expectancy_data <- gapminder %>%
-  filter(year %in% c(1952, 2007)) %>%
-  select(country, continent, year, lifeExp)
-
-# Module 1: Life expectancy over time
-plot1 <- ggplot(life_expectancy_data, aes(x = year, y = lifeExp, color = continent)) +
-  geom_line(aes(group = country), alpha = 0.5) +
-  labs(title = "Life Expectancy Over Time", x = "Year", y = "Life Expectancy") +
-  theme_minimal()
-
-# Module 2: Life expectancy distribution in 2007
-plot2 <- ggplot(life_expectancy_data %>% filter(year == 2007), aes(x = lifeExp, fill = continent)) +
-  geom_histogram(binwidth = 2, alpha = 0.7, position = "identity") +
-  labs(title = "Life Expectancy Distribution in 2007", x = "Life Expectancy", y = "Count") +
-  theme_minimal()
-
-# Module 3: Interactive scatter plot of life expectancy vs GDP per capita
-gapminder_2007 <- gapminder %>% filter(year == 2007)
-plot3 <- plot_ly(gapminder_2007, x = ~gdpPercap, y = ~lifeExp, type = 'scatter', mode = 'markers',
-                 color = ~continent, text = ~country, marker = list(size = 10)) %>%
-  layout(title = "Life Expectancy vs GDP per Capita (2007)",
-         xaxis = list(title = "GDP per Capita"),
-         yaxis = list(title = "Life Expectancy"))
-
-# Display plots
-plot1
-plot2
-plot3
 ``` 
