@@ -1,9 +1,11 @@
 ---
-title: "Ćwiczenia z analizy danych w R"
+title: "Ćwiczenia z analizy danych w R - Spotkanie 2."
 author: "mmcharchuta"
 date: "2025-04-08"
 output:
+  pdf_document: default
   html_document: default
+always_allow_html: true
 ---
 
 ### ĆWICZENIE NR 1: Wczytaj i zbadaj zbiór danych
@@ -106,8 +108,23 @@ plot <- ggplot(polish_tips, aes(x = total_bill, y = tip, color = sex)) +
   ) +
   theme_minimal()
 
-# Convert ggplot to plotly
-ggplotly(plot)
+# Render Plotly for HTML and static ggplot for PDF
+# Uncomment the following lines to use first method to achieve so
+# if (knitr::is_html_output()) {
+#   ggplotly(plot)
+# } else {
+#   print(plot)
+# }
+
+# Save the graph as an image for PDF output
+plotly_graph <- plotly::ggplotly(plot)
+if (!knitr::is_html_output()) {
+  saveWidget(plotly_graph, "plotly_graph.html", selfcontained = TRUE)
+  webshot::webshot("plotly_graph.html", file = "plotly_graph.png")
+  knitr::include_graphics("plotly_graph.png")
+} else {
+  plotly_graph
+}
 
 # Perform a t-test to compare tips given by men and women
 t_test_result <- t.test(tip ~ sex, data = tips, alternative = "greater")
@@ -216,37 +233,3 @@ ggplot(categorical_categorical_data, aes(x = day, y = sex, fill = ..count..)) +
 ```
 
 ---
-
-### PROJEKT NA ZAJĘCIA NR 2: Exploratory vs Explanatory
-
-#### **Exploratory Visualization**
-```{r exploratory_visualization, message=FALSE, warning=FALSE}
-# Exploratory visualization: Scatter plot with trend line
-ggplot(tips, aes(x = total_bill, y = tip)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  labs(title = "Exploratory: Relationship Between Total Bill and Tip", x = "Total Bill", y = "Tip") +
-  theme_minimal()
-```
-
-#### **Explanatory Visualization**
-```{r explanatory_visualization, message=FALSE, warning=FALSE}
-# Explanatory visualization: Annotated scatter plot
-ggplot(tips, aes(x = total_bill, y = tip)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  annotate("text", x = 40, y = 8, label = "Higher bills tend to have higher tips", color = "red") +
-  labs(title = "Explanatory: Total Bill vs Tip", x = "Total Bill", y = "Tip") +
-  theme_minimal()
-```
-
-#### **Mixed Visualization**
-```{r mixed_visualization, message=FALSE, warning=FALSE}
-# Mixed visualization: Combining exploratory and explanatory
-ggplot(tips, aes(x = total_bill, y = tip)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(method = "lm", se = FALSE, color = "blue") +
-  annotate("text", x = 40, y = 8, label = "Higher bills tend to have higher tips", color = "red") +
-  labs(title = "Mixed: Total Bill vs Tip", x = "Total Bill", y = "Tip") +
-  theme_minimal()
-```

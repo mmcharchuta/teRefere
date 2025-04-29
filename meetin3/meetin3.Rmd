@@ -1,0 +1,139 @@
+---
+title: "Ćwiczenia z analizy danych w R - Spotkanie 3."
+author: "mmcharchuta"
+date: "2025-04-15"
+output:
+  pdf_document: default
+  html_document: default
+always_allow_html: true
+---
+
+### ĆWICZENIE NR 1: Różne typy wizualizacji - ten sam zestaw danych
+
+```{r load_and_explore_data, message=FALSE, warning=FALSE}
+# Load necessary libraries
+library(tidyverse)
+# Load the dataset
+# Unnecessary to load the dataset again, as it was already loaded with tidyverse!
+
+# Explore the dataset
+summary(mpg)
+head(mpg)
+
+# Barplot: Count of cars by class
+ggplot(mpg, aes(x = class)) +
+  geom_bar(fill = "steelblue") +
+  labs(
+    title = "Barplot: Count of Cars by Class",
+    x = "Class",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# Lollipop chart: Count of cars by class
+mpg_class_count <- mpg %>%
+  count(class)
+
+ggplot(mpg_class_count, aes(x = class, y = n)) +
+  geom_segment(aes(x = class, xend = class, y = 0, yend = n), color = "gray") +
+  geom_point(color = "steelblue", size = 4) +
+  labs(
+    title = "Lollipop Chart: Count of Cars by Class",
+    x = "Class",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+# Pie chart: Proportion of cars by class with percentages and counts
+mpg_class_count <- mpg_class_count %>%
+    mutate(percentage = n / sum(n) * 100)
+
+ggplot(mpg_class_count, aes(x = "", y = n, fill = class)) +
+    geom_bar(stat = "identity", width = 1) +
+    coord_polar("y") +
+    geom_text(aes(label = paste0(round(percentage, 1), "% (", n, ")")), 
+                        position = position_stack(vjust = 0.5), size = 3) +
+    labs(
+        title = "Pie Chart: Proportion of Cars by Class",
+        x = NULL,
+        y = NULL,
+        fill = "Class"
+    ) + 
+  theme_void()
+
+```
+### ĆWICZENIE NR 2: Dodanie narracyjnych adnotacji
+
+```{r add_annotations, message=FALSE, warning=FALSE}
+# Scatterplot: Relationship between displacement and highway mileage
+ggplot(mpg, aes(x = displ, y = hwy)) +
+  geom_point(color = "steelblue") +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  annotate("text", x = 5, y = 40, label = "Higher displacement, lower mileage", color = "darkred", size = 4, hjust = 0) +
+  labs(
+    title = "Scatterplot: Displacement vs Highway Mileage",
+    x = "Displacement (liters)",
+    y = "Highway Mileage (mpg)"
+  ) +
+  theme_minimal()
+```
+### ĆWICZENIE NR 3: Binary vs. ordinal_vs_binary
+
+```{r binary_vs_ordinal, message=FALSE, warning=FALSE}
+# Create a binary variable: Automatic vs Manual transmission
+mpg_binary_ordinal <- mpg %>%
+  mutate(transmission = ifelse(str_detect(trans, "auto"), "Automatic", "Manual"))
+
+# Visualization 1: Boxplot with data points
+ggplot(mpg_binary_ordinal, aes(x = transmission, y = cty, fill = transmission)) +
+  geom_boxplot(alpha = 0.7) +
+  geom_jitter(width = 0.2, alpha = 0.5, color = "black") +
+  labs(
+    title = "Boxplot: Mileage by Transmission Type (with Data Points)",
+    x = "Transmission Type",
+    y = "City Mileage (miles per gallon)"
+  ) +
+  theme_minimal()
+
+# Visualization 2: Violin plot with data points
+ggplot(mpg_binary_ordinal, aes(x = transmission, y = cty, fill = transmission)) +
+  geom_violin(alpha = 0.7) +
+  geom_jitter(width = 0.2, alpha = 0.5, color = "black") +
+  labs(
+    title = "Violin Plot: City Mileage by Transmission Type (with Data Points)",
+    x = "Transmission Type",
+    y = "City Mileage (miles per gallon)"
+  ) +
+  theme_minimal()
+```
+
+### ĆWICZENIE NR 4: Ordinal vs. Binary
+
+```{r ordinal_vs_binary, message=FALSE, warning=FALSE}
+# Create a binary variable: High vs Low highway mileage
+mpg_ordinal_binary <- mpg %>%
+  mutate(high_mileage = ifelse(hwy > median(hwy), "High Mileage", "Low Mileage"))
+
+# Visualization 1: Stacked bar plot
+ggplot(mpg_ordinal_binary, aes(x = class, fill = high_mileage)) +
+  geom_bar(position = "fill") +
+  labs(
+    title = "Proportion of High vs Low Highway Mileage by Class",
+    x = "Class",
+    y = "Proportion",
+    fill = "Mileage Level"
+  ) +
+  theme_minimal()
+
+# Visualization 2: Grouped bar plot
+ggplot(mpg_ordinal_binary, aes(x = class, fill = high_mileage)) +
+  geom_bar(position = "dodge") +
+  labs(
+    title = "Count of High vs Low Highway Mileage by Class",
+    x = "Class",
+    y = "Count",
+    fill = "Mileage Level"
+  ) +
+  theme_minimal()
+```
+
