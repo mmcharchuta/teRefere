@@ -1,0 +1,96 @@
+---
+title: "Ćwiczenia z analizy danych w R - Spotkanie 4."
+author: "mmcharchuta"
+date: "2025-04-29"
+output:
+  html_document: default
+  pdf_document: default
+always_allow_html: true
+---
+
+### Przykład kodu do animacji
+
+```{r, message=FALSE, warning=FALSE}
+# Load necessary libraries
+library(gganimate) 
+library(gapminder)
+library('transformr')
+library(gifski) 
+p <- ggplot(gapminder::gapminder, aes(x = gdpPercap, y = lifeExp, size = pop, color = continent)) + geom_point(alpha = 0.7) + scale_x_log10() + labs(title = 'Year: {frame_time}') + gganimate::transition_time(year) + ease_aes('linear')
+animate(p, nframes = 100, fps = 20)
+```
+
+### Przykład drugi
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(gapminder)
+library(patchwork)
+
+gapminder::gapminder %>% filter(year == 2007) %>% ggplot(aes(x = continent, y = gdpPercap)) + geom_boxplot()
+
+ggplot(gapminder::gapminder, aes(x = lifeExp, fill = continent)) + 
+  geom_histogram() + 
+  facet_wrap(~ continent) 
+
+ggplot(mpg, aes(x = displ, y = hwy, color = class == "suv")) + geom_point() + scale_color_manual(values = c("grey", "red")) 
+
+p1 <- ggplot(subset(mpg, class == "suv"), aes(x = hwy)) + 
+  geom_histogram(fill = "red", bins = 15)
+p2 <- ggplot(subset(mpg, class == "compact"), aes(x = hwy)) +
+  geom_histogram(fill = "blue", bins = 15)
+
+p1 + p2 + p1 # patchwork: plot side by side
+
+```
+
+
+### Ćwiczenie 3 Binary vs Continuous on a fasciung dataset of the San peaople
+
+```{r}
+# Load necessary library
+library(lgrdata)
+
+# Load the Howell dataset
+data("howell", package = "lgrdata")
+
+# Explore the dataset
+head(howell)
+
+# Binary vs Continuous example: Relationship between sex (binary) and height (continuous)
+library(ggplot2)
+
+# Boxplot visualization
+ggplot(howell, aes(x = sex, y = height)) +
+  geom_boxplot(fill = "lightblue") +
+  labs(title = "Height by Sex", x = "Sex", y = "Height (cm)") +
+  theme_minimal()
+
+# Violin plot visualization
+ggplot(howell, aes(x = sex, y = height, fill = sex)) +
+  geom_violin(trim = FALSE, alpha = 0.7) +
+  geom_jitter(width = 0.2, alpha = 0.5) +
+  labs(title = "Height Distribution by Sex", x = "Sex", y = "Height (cm)") +
+  theme_minimal()
+```
+
+### Ćwiczenie 4 Continuous vs Binary
+
+```{r}
+# Continuous vs Binary example: Relationship between height (continuous) and sex (binary)
+library(ggplot2)
+
+# Density plot visualization
+ggplot(howell, aes(x = height, fill = sex)) +
+  geom_density(alpha = 0.7) +
+  labs(title = "Height Distribution by Sex", x = "Height (cm)", y = "Density") +
+  theme_minimal()
+
+# Scatter plot with jitter visualization
+ggplot(howell, aes(x = height, y = as.numeric(sex) - 1, color = sex)) +
+  geom_jitter(height = 0.1, alpha = 0.5) +
+  labs(title = "Height vs Sex", x = "Height (cm)", y = "Sex (Binary)") +
+  theme_minimal()
+
+```
