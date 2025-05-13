@@ -1,0 +1,363 @@
+---
+title: "PROJEKT NA ZAJĘCIA NR 5: WYSIWYG: CIP/CI (Continous Integration Pipeline/Continuous Improvement)"
+author: "mmcharchuta"
+date: "2025-05-13"
+lang: "en-US"
+output:
+  pdf_document: default
+  html_document: default
+always_allow_html: true
+---
+Cel: Stworzenie najładniejszego wykresu wizualizującego zbiór danych.
+Sposób osiągnięcia tego celu: stworzenie wykresu i wprowadzenie szeregu
+świadomych i celowych ulepszeń do proponowanej wizualizacji.
+
+1. Wybierz dane i stwórz dowolny wykres (relatywnie podstawowy, załącz go do
+wizualizacji).
+2. Wprowadź jedno graficzne ulepszenie tego wykresu. Przykładowe: dopasowanie
+długości osi y, dodanie tytułu, sformatowanie tytułu, zmiana symboli, poprawa
+czcionki na wykresie.
+3. Dołącz aktualną wersję wykresu do wizualizacji wraz z komentarzem
+opisującym (1) co zostało zmienione i (2) w jaki sposób ta konkretna
+modyfikacja ma ulepszyć wizualizację danych.
+4. Powtórz kroki 2 i 3. Minimalna liczba powtórzeń: 19
+
+# Downloaded data from: https://data.giss.nasa.gov/gistemp/tabledata_v4/T_AIRS/GLB.Ts+dSST.csv (Global-mean monthly, seasonal, and annual means, 2002-present, updated through most recent month)
+
+```{r loading libraries and data, message=FALSE, warning=FALSE,  fig.cap = "loading libraries and data"}
+library(tidyverse)
+temperature_data <- read_csv("data/GLB.Ts+dSST.csv", skip=1, na = "***") %>%
+  select(year = Year, t_diff = `J-D`) %>%
+  drop_na()
+```
+\newpage
+```{r Step 1 - basic graph, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+    geom_point()
+```
+\newpage
+Dodanie tytułu by przyciągnąć uwagę i nadać kontekst:
+```{r Step 2 - Iteration 1, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+    geom_point() +
+  labs(
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX"
+  )
+```
+\newpage
+Dodanie podtytułu ze źródłem danych:
+```{r Step 2 - Iteration 2, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+    geom_point() +
+  labs(
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  )
+```
+\newpage
+Dodanie opisu osi OX:
+```{r Step 2 - Iteration 3, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+    geom_point() +
+  labs(
+    x = "YEAR",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  )
+```
+\newpage
+Dodanie opisu osi OY:
+```{r Step 2 - Iteration 4, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+    geom_point() +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  )
+```
+\newpage
+Dodanie znaku stopnia do opisu osi OY:
+```{r Step 2 - Iteration 5, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+    geom_point() +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  )
+```
+\newpage
+Dodanie  znaku stopnia do znaczników osi OY:
+```{r Step 2 - Iteration 6, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+    geom_point() +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+    scale_y_continuous(labels = ~ paste0(.x, "°"))
+```
+\newpage
+Pokolorowanie punktów (by się wyróżniały) i z jakiegoś powodu inna pisownia colour w legendzie, a inna w argumencie geom_pointa
+```{r Step 2 - Iteration 7, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+    geom_point(fill="white", aes(color = "1")) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+    scale_y_continuous(labels = ~ paste0(.x, "°"))
+```
+\newpage
+Zmiana kształtu punktów by się wyróżniały 
+```{r Step 2 - Iteration 8, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+    geom_point(fill="white", aes(color = "1"), shape=21) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+    scale_y_continuous(labels = ~ paste0(.x, "°"))
+```
+\newpage
+Dodanie linii trendu by pomóc odbiorcy zauważyć trend w danych (domyślna metoda "curved loess" regresji lokalnej)
+```{r Step 2 - Iteration 9, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_point(fill="white", aes(color = "1"), shape=21) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  geom_smooth() +
+  scale_y_continuous(labels = ~ paste0(.x, "°"))
+```
+\newpage
+Zdecydowałem się ukryć przedział ufności z otoczenia linii trendu by uprościć wykres 
+```{r Step 2 - Iteration 10, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_point(fill="white", aes(color = "1"), shape=21) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  geom_smooth(se=FALSE) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"))
+```
+\newpage
+Usunąłem tę legendę - dopiero zauważyłem, że jest niepotrzebna i irytująca
+```{r Step 2 - Iteration 11, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_point(fill="white", aes(color = "1"), shape=21, show.legend = FALSE) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  geom_smooth(se=FALSE) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"))
+```
+\newpage
+Zmieniłem rozmieszczenie znaczników - istotne jest dla mnie by czytelnik widział, że dane są aktualne aż do br.
+```{r Step 2 - Iteration 12, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_point(fill="white", aes(color = "1"), shape=21, show.legend = FALSE) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  geom_smooth(se=FALSE) +
+  scale_x_continuous(breaks=seq(1880, 2025, 20), expand=c(0,0)) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"))
+```
+\newpage
+Oś OY też dopasowałem do występujących w zestawie zakresów zmiennej - zapewne rok 1909 zginie (w zenicie osi OX), ale jest to poświęcenie na które jestem gotów 
+```{r Step 2 - Iteration 13, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_point(fill="white", aes(color = "1"), shape=21, show.legend = FALSE) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  geom_smooth(se=FALSE) +
+  scale_x_continuous(breaks=seq(1880, 2025, 20), expand=c(0,0)) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"), limits=c(-0.5, 1.5), expand=c(0,0))
+```
+\newpage
+Usunąłem te "ticksy" - dosłownie jak kleszcze albo inne pasożyty wyglądają. Do tego jasne tło da odbiorcy poczucie czystości i "neatness"
+```{r Step 2 - Iteration 14, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_point(fill="white", aes(color = "1"), shape=21, show.legend = FALSE) +
+  geom_smooth(se=FALSE) +
+  scale_x_continuous(breaks=seq(1880, 2025, 20), expand=c(0,0)) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"), limits=c(-0.5, 1.5), expand=c(0,0)) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  theme_light() +
+  theme(
+    axis.ticks = element_blank()
+  )
+```
+\newpage
+Połączenie punktów danych linią - pomoże zauważyć wahania rok do roku
+```{r Step 2 - Iteration 15, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_line(aes(color = "1"), size=0.5, show.legend = FALSE) + 
+  geom_point(fill="white", aes(color = "1"), shape=21, show.legend = FALSE) +
+  geom_smooth(se=FALSE) +
+  scale_x_continuous(breaks=seq(1880, 2025, 20), expand=c(0,0)) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"), limits=c(-0.5, 1.5), expand=c(0,0)) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  theme_light() +
+  theme(
+    axis.ticks = element_blank()
+  )
+```
+\newpage
+Wyróżniłem tytuł kolorem - źródło danych jest dla odbiorcy drugorzędne
+```{r Step 2 - Iteration 16, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_line(aes(color = "1"), size=0.5, show.legend = FALSE) + 
+  geom_point(fill="white", aes(color = "1"), shape=21, show.legend = FALSE) +
+  geom_smooth(se=FALSE) +
+  scale_x_continuous(breaks=seq(1880, 2025, 20), expand=c(0,0)) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"), limits=c(-0.5, 1.5), expand=c(0,0)) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  theme_light() +
+  theme(
+    axis.ticks = element_blank(),
+    plot.title = element_text(color="red")
+  )
+```
+\newpage
+Wyróżniłem tytuł boldem - źródło danych jest dla odbiorcy drugorzędne
+```{r Step 2 - Iteration 17, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_line(aes(color = "1"), size=0.5, show.legend = FALSE) + 
+  geom_point(fill="white", aes(color = "1"), shape=21, show.legend = FALSE) +
+  geom_smooth(se=FALSE) +
+  scale_x_continuous(breaks=seq(1880, 2025, 20), expand=c(0,0)) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"), limits=c(-0.5, 1.5), expand=c(0,0)) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  theme_light() +
+  theme(
+    axis.ticks = element_blank(),
+    plot.title = element_text(margin = margin(b=10), color="red", face="bold")
+  )
+```
+\newpage
+Zmniejszyłem podtytuł - źródło danych jest dla odbiorcy drugorzędne
+```{r Step 2 - Iteration 18, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_line(aes(color = "1"), size=0.5, show.legend = FALSE) + 
+  geom_point(fill="white", aes(color = "1"), shape=21, show.legend = FALSE) +
+  geom_smooth(se=FALSE) +
+  scale_x_continuous(breaks=seq(1880, 2025, 20), expand=c(0,0)) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"), limits=c(-0.5, 1.5), expand=c(0,0)) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  theme_light() +
+  theme(
+    axis.ticks = element_blank(),
+    plot.title = element_text(margin = margin(b=10), color="red", face="bold"),
+    plot.subtitle = element_text(size=8, margin = margin(b=10)),
+  )
+```
+\newpage
+Dodałem legendę odróżniającą same dane od linii trendu
+```{r Step 2 - Iteration 19, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_line(aes(color = "1"), size=0.5, show.legend = FALSE) + 
+  geom_point(fill="white", aes(color = "1"), shape=21, show.legend = TRUE) +
+  geom_smooth(se=FALSE, aes(color = "2"), size=0.5, span=0.15, show.legend = FALSE) +
+  scale_x_continuous(breaks=seq(1880, 2025, 20), expand=c(0,0)) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"), limits=c(-0.5, 1.5), expand=c(0,0)) +
+  scale_color_manual(name=NULL,
+                     breaks=c(1, 2),
+                     values=c("gray", "black"),
+                     labels=c("Annual mean", "Lowess smoothing"), 
+                     guide = guide_legend(override.aes = list(shape=15, size=5))) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  theme_light() +
+  theme(
+    axis.ticks = element_blank(),
+    plot.title = element_text(margin = margin(b=10), color="red", face="bold"),
+    plot.subtitle = element_text(size=8, margin = margin(b=10)),
+  )
+```
+\newpage
+Poprawiłem jej położenie, żeby zmniejszyć rozmiar całego obrazu
+```{r Step 2 - Iteration 20, message=FALSE, warning=FALSE}
+ggplot(temperature_data, aes(x=year, y=t_diff)) +
+  geom_line(aes(color = "1"), size=0.5, show.legend = FALSE) + 
+  geom_point(fill="white", aes(color = "1"), shape=21, show.legend = TRUE) +
+  geom_smooth(se=FALSE, aes(color = "2"), size=0.5, span=0.15, show.legend = FALSE) +
+  scale_x_continuous(breaks=seq(1880, 2025, 20), expand=c(0,0)) +
+  scale_y_continuous(labels = ~ paste0(.x, "°"), limits=c(-0.5, 1.5), expand=c(0,0)) +
+  scale_color_manual(name=NULL,
+                     breaks=c(1, 2),
+                     values=c("gray", "black"),
+                     labels=c("Annual mean", "Lowess smoothing"), 
+                     guide = guide_legend(override.aes = list(shape=15, size=5))) +
+  labs(
+    x = "YEAR",
+    y = "Temperature anomaly (\u00B0C)",
+    title = "GLOBAL LAND-OCEAN TEMPERATURE INDEX",
+    subtitle = "Data source: NASA's Goddard Institute for Space Studies (GISS).\nCredit: NASA/GISS"
+  ) +
+  theme_light() +
+  theme(
+    axis.ticks = element_blank(),
+    plot.title = element_text(margin = margin(b=10), color="red", face="bold"),
+    plot.subtitle = element_text(size=8, margin = margin(b=10)),
+    legend.position = c(0.15, 0.9),
+    legend.title = element_text(size=0),
+    legend.key.height = unit(10, "pt"),
+    legend.margin = margin(0,0,0,0)
+  )
+```
